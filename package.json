@@ -1,0 +1,43 @@
+{
+  "name": "prism-ledger",
+  "version": "1.0.0",
+  "description": "Prism Ledger is the money core of a wallet, marketplace or payments company. Every movement is a journal of debit and credit legs that must balance per currency, and it is validated in full before anything is applied, so a journal either lands completely or not at all. Idempotency keys turn client retries into safe replays, and a key reused with a different payload is a 409 conflict. Holds reserve funds for card authorisations and withdrawals, then capture all or part of them. Each tenant has isolated accounts and its own SHA-256 hash chain: editing, deleting or reordering any journal is detected, and a Merkle root over all chains can be published as an external anchor. A reconciliation engine matches expected cash movements against bank statements by reference, by amount and date, net of fees, and as many-to-one settlement batches (using a bounded subset sum). Anything left over becomes a categorised break.",
+  "type": "module",
+  "bin": {
+    "ledger": "bin/ledger.js"
+  },
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "start": "npx --yes serve ."
+  },
+  "keywords": [
+    "ledger",
+    "double-entry",
+    "accounting",
+    "fintech",
+    "payments",
+    "idempotency",
+    "reconciliation",
+    "audit-log",
+    "hash-chain",
+    "javascript"
+  ],
+  "author": "Soumya Bhandare (krishyaa06)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krishyaa06/prism-ledger.git"
+  },
+  "homepage": "https://krishyaa06.github.io/prism-ledger/",
+  "engines": {
+    "node": ">=18.17"
+  }
+}

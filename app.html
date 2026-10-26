@@ -1,0 +1,41 @@
+<div class="sim">
+  <div class="main">
+    <div class="panel glow">
+      <div class="toolbar">
+        <button class="btn primary sm" data-play>▶ Run</button>
+        <select data-speed aria-label="Speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="3">3×</option></select>
+        <select id="ten" aria-label="Tenant"></select>
+        <span class="sep"></span>
+        <button class="btn sm" id="storm">Retry storm</button>
+        <button class="btn sm" id="race">Double-spend race</button>
+        <button class="btn sm" id="over">Overdraft</button>
+        <button class="btn sm bad" id="tamper">Tamper a journal</button>
+        <button class="btn sm" id="audit">Full audit</button>
+        <span class="sp"></span>
+        <span class="live"><i></i> paused</span>
+      </div>
+      <div id="kpis" style="margin-top:12px"></div>
+    </div>
+    <div class="viz" id="floww" style="height:500px"><span class="tag" id="clock">money flow · hash chain</span><canvas id="flow"></canvas></div>
+    <div class="g2 grid">
+      <div class="panel"><div class="ph">Journals / s <span class="sp"></span><span class="pill dim">posted · replayed · rejected</span></div><canvas class="chart" id="ch1" style="height:150px"></canvas></div>
+      <div class="panel"><div class="ph">Cash vs owed <span class="sp"></span><span class="pill dim" id="eqp">A = L + E + P</span></div><canvas class="chart" id="ch2" style="height:150px"></canvas></div>
+    </div>
+  </div>
+  <div class="side">
+    <div class="panel"><div class="ph">Journal inspector <span class="sp"></span><span class="pill dim" id="insw">latest</span></div><div id="insp" class="insp"></div></div>
+    <div class="panel"><div class="ph">Post a transfer <span class="sp"></span><span class="pill dim">POST /journals</span></div>
+      <div class="tf">
+        <label class="f">From<select id="from"></select></label>
+        <label class="f">To<select id="to"></select></label>
+        <label class="f">Amount<input id="amt" value="250.00" inputmode="decimal"></label>
+        <label class="f">Idempotency-Key<input id="key" readonly></label>
+      </div>
+      <div class="toolbar" style="margin-top:8px"><button class="btn primary sm" id="send">Send</button><button class="btn sm" id="again">Send again</button><button class="btn sm" id="nkey">New key</button></div>
+      <div id="tres" class="tres"></div>
+    </div>
+    <div class="panel"><div class="ph">Reconciliation <span class="sp"></span><span class="pill dim" id="rcp">every 5 s</span></div><div id="recon" class="recon"></div></div>
+    <div class="panel"><div class="ph">Trial balance <span class="sp"></span><span class="pill dim" id="tbp">—</span></div><div id="tb" class="tb"></div></div>
+    <div class="panel"><div class="ph">Events</div><div id="log" class="log" style="height:180px;font-size:11px"></div></div>
+  </div>
+</div>

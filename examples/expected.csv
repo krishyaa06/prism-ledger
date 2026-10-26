@@ -1,0 +1,10 @@
+id,date,amount,ref,memo
+jrn_12,2026-10-20,1250.00,tp_12,Wallet top-up
+jrn_13,2026-10-20,480.00,tp_13,Wallet top-up
+jrn_15,2026-10-20,2200.00,tp_15,Wallet top-up
+jrn_16,2026-10-20,999.00,tp_16,Wallet top-up
+jrn_18,2026-10-20,-15400.00,po_88,Merchant payout (IMPS)
+jrn_21,2026-10-21,3000.00,tp_21,Wallet top-up
+jrn_22,2026-10-21,-2500.00,wd_22,Withdraw to bank
+jrn_24,2026-10-21,640.00,tp_24,Wallet top-up
+jrn_25,2026-10-21,-8200.00,po_91,Merchant payout (IMPS)

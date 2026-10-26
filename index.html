@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prism Ledger · Double-entry ledger with idempotency, holds, hash-chain audit and reconciliation · Prism Systems</title>
+  <meta name="description" content="Prism Ledger is the money core of a wallet, marketplace or payments company. Every movement is a journal of debit and credit legs that must balance per currency, and it is validated in full before anything is applied, so a journal either lands completely or not at all. Idempotency keys turn client retries into safe replays, and a key reused with a different payload is a 409 conflict. Holds reserve funds for card authorisations and withdrawals, then capture all or part of them. Each tenant has isolated accounts and its own SHA-256 hash chain: editing, deleting or reordering any journal is detected, and a Merkle root over all chains can be published as an external anchor. A reconciliation engine matches expected cash movements against bank statements by reference, by amount and date, net of fees, and as many-to-one settlement batches (using a bounded subset sum). Anything left over becomes a categorised break." />
+  <meta name="theme-color" content="#06070d" />
+  <meta property="og:title" content="Prism Ledger · Prism Systems" />
+  <meta property="og:description" content="Prism Ledger is the money core of a wallet, marketplace or payments company. Every movement is a journal of debit and credit legs that must balance per currency, and it is validated in full before anything is applied, so a journal either lands completely or not at all. Idempotency keys turn client retries into safe replays, and a key reused with a different payload is a 409 conflict. Holds reserve funds for card authorisations and withdrawals, then capture all or part of them. Each tenant has isolated accounts and its own SHA-256 hash chain: editing, deleting or reordering any journal is detected, and a Merkle root over all chains can be published as an external anchor. A reconciliation engine matches expected cash movements against bank statements by reference, by amount and date, net of fees, and as many-to-one settlement batches (using a bounded subset sum). Anything left over becomes a categorised break." />
+  <meta property="og:image" content="https://krishyaa06.github.io/prism-ledger/assets/screenshots/desktop.png" />
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pro.css" />
+  <link rel="stylesheet" href="css/app.css" />
+  <style>:root{--accent:#5CC8FF;--accent-2:#34F5C5}</style>
+</head>
+<body>
+  <canvas id="bg" aria-hidden="true"></canvas>
+  <header class="topbar"><div class="wrap">
+    <a class="brand" href="./"><span class="mark">◆</span><b>PRISM</b><span>Ledger</span></a>
+    <nav>
+      <a class="nl" href="#sim">Simulator</a><a class="nl" href="#features">Features</a><a class="nl" href="#how">How it works</a><a class="nl" href="#arch">Architecture</a><a class="nl" href="#use">Use it</a>
+      <a class="btn sm" href="https://github.com/krishyaa06/prism-ledger" target="_blank" rel="noreferrer">★ GitHub</a>
+    </nav>
+  </div></header>
+  <main>
+    <section class="hero wrap">
+      <p class="eyebrow"><span class="n">10 / 49</span>Prism Systems · FinTech &amp; Banking</p>
+      <h1>A ledger where money <em>can't be lost, doubled or quietly edited</em></h1>
+      <p class="lead">A multi-tenant double-entry ledger with atomic journals, idempotency keys, two-phase holds, reversals, point-in-time balances, a per-tenant SHA-256 hash chain with a Merkle anchor, and bank reconciliation that matches settlement batches net of processor fees.</p>
+      <div class="cta"><a class="btn primary" href="#sim">▶ Launch the simulator</a><a class="btn" href="#use">Use the engine</a><a class="btn ghost" href="https://github.com/krishyaa06/prism-ledger" target="_blank" rel="noreferrer">View source →</a></div>
+      <div class="chips"><span class="chip"><i></i>Zero dependencies</span><span class="chip"><i></i>Integer minor units</span><span class="chip"><i></i>Idempotency keys</span><span class="chip"><i></i>SHA-256 hash chain</span><span class="chip"><i></i>Reconciliation engine</span></div>
+    </section>
+    <section class="section wrap" id="sim">
+      <div class="sec-head"><span class="kicker">Live simulator</span><h2>Three fintechs on one ledger, with money moving live</h2><p>Kirana Pay, Campus Wallet and Gulf Remit share one ledger but each has its own accounts and hash chain. Watch top-ups, QR payments, payouts and remittances move between accounts, and PSP settlements get matched by reconciliation. Fire a retry storm or a double-spend race, tamper with a posted journal and run a full audit, book breaks, or post your own transfer and send it again with the same key.</p></div>
+<div class="sim">
+  <div class="main">
+    <div class="panel glow">
+      <div class="toolbar">
+        <button class="btn primary sm" data-play>▶ Run</button>
+        <select data-speed aria-label="Speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="3">3×</option></select>
+        <select id="ten" aria-label="Tenant"></select>
+        <span class="sep"></span>
+        <button class="btn sm" id="storm">Retry storm</button>
+        <button class="btn sm" id="race">Double-spend race</button>
+        <button class="btn sm" id="over">Overdraft</button>
+        <button class="btn sm bad" id="tamper">Tamper a journal</button>
+        <button class="btn sm" id="audit">Full audit</button>
+        <span class="sp"></span>
+        <span class="live"><i></i> paused</span>
+      </div>
+      <div id="kpis" style="margin-top:12px"></div>
+    </div>
+    <div class="viz" id="floww" style="height:500px"><span class="tag" id="clock">money flow · hash chain</span><canvas id="flow"></canvas></div>
+    <div class="g2 grid">
+      <div class="panel"><div class="ph">Journals / s <span class="sp"></span><span class="pill dim">posted · replayed · rejected</span></div><canvas class="chart" id="ch1" style="height:150px"></canvas></div>
+      <div class="panel"><div class="ph">Cash vs owed <span class="sp"></span><span class="pill dim" id="eqp">A = L + E + P</span></div><canvas class="chart" id="ch2" style="height:150px"></canvas></div>
+    </div>
+  </div>
+  <div class="side">
+    <div class="panel"><div class="ph">Journal inspector <span class="sp"></span><span class="pill dim" id="insw">latest</span></div><div id="insp" class="insp"></div></div>
+    <div class="panel"><div class="ph">Post a transfer <span class="sp"></span><span class="pill dim">POST /journals</span></div>
+      <div class="tf">
+        <label class="f">From<select id="from"></select></label>
+        <label class="f">To<select id="to"></select></label>
+        <label class="f">Amount<input id="amt" value="250.00" inputmode="decimal"></label>
+        <label class="f">Idempotency-Key<input id="key" readonly></label>
+      </div>
+      <div class="toolbar" style="margin-top:8px"><button class="btn primary sm" id="send">Send</button><button class="btn sm" id="again">Send again</button><button class="btn sm" id="nkey">New key</button></div>
+      <div id="tres" class="tres"></div>
+    </div>
+    <div class="panel"><div class="ph">Reconciliation <span class="sp"></span><span class="pill dim" id="rcp">every 5 s</span></div><div id="recon" class="recon"></div></div>
+    <div class="panel"><div class="ph">Trial balance <span class="sp"></span><span class="pill dim" id="tbp">—</span></div><div id="tb" class="tb"></div></div>
+    <div class="panel"><div class="ph">Events</div><div id="log" class="log" style="height:180px;font-size:11px"></div></div>
+  </div>
+</div>
+
+    </section>
+    <section class="section wrap" id="features">
+      <div class="sec-head reveal"><span class="kicker">Features</span><h2>What's inside the engine</h2><p>Real algorithms, not mock-ups. The simulator above runs the exact same code you import.</p></div>
+      <div class="feat"><div class="card reveal"><div class="ic">⚖</div><h3>Double-entry, per currency</h3><p>Every journal needs at least two legs, and debits must equal credits within each currency. Multi-currency journals (such as FX remittances) balance through position accounts. All amounts are integer minor units, never floats.</p></div><div class="card reveal"><div class="ic">⚛</div><h3>Atomic by construction</h3><p>A journal is fully validated before any change is applied, so applying it can&#x27;t fail halfway. Batches are all-or-nothing and roll back balances, the chain head and idempotency keys.</p></div><div class="card reveal"><div class="ic">↺</div><h3>Idempotency keys</h3><p>Retrying with the same key and payload returns the original journal (HTTP 200 with <code class="mono">Idempotent-Replayed</code>). The same key with a different body is a 409. Keys expire after a TTL.</p></div><div class="card reveal"><div class="ic">⏸</div><h3>Two-phase holds</h3><p>Funds can be reserved, then captured in full or in part, voided or left to expire. Available balance is balance minus holds, so reserved money can never be spent twice.</p></div><div class="card reveal"><div class="ic">⛓</div><h3>Tamper-evident history</h3><p>Each journal&#x27;s hash covers its canonical JSON plus the previous hash. Verification re-hashes the chain and re-sums every balance, catching edits, deletions, reordering and direct balance changes.</p></div><div class="card reveal"><div class="ic">⌖</div><h3>Point-in-time balances</h3><p>Each account keeps its balance after every journal, so balances as of any time or sequence number come from a binary search. Statements show running balances, and trial balances can be taken at any point.</p></div><div class="card reveal"><div class="ic">⇄</div><h3>Reconciliation</h3><p>Matches run in order: reference, amount + date, net of an exact processor fee, then settlement batches (a contiguous run first, then a bounded subset sum). The engine also detects a batch where the processor left out exactly one item.</p></div><div class="card reveal"><div class="ic">⚡</div><h3>HTTP API + CLI</h3><p>Tenants, accounts, journals (with an <code class="mono">Idempotency-Key</code> header), holds, reversals, trial balance, balance sheet, verify, export and reconcile. The CLI covers demo, simulate, recon, verify, bench and serve.</p></div></div>
+    </section>
+    <section class="section wrap" id="how">
+      <div class="sec-head reveal"><span class="kicker">How it works</span><h2>From request to result</h2></div>
+      <div class="steps"><div class="step reveal"><h3>Normalise</h3><p>Each leg is resolved to an account in this tenant. Sides are checked, string amounts are parsed into exact minor units, and currencies must match the account.</p></div><div class="step reveal"><h3>Replay check</h3><p>If the idempotency key was seen within the TTL, the payload fingerprints are compared: a match replays the original journal, a mismatch is a conflict.</p></div><div class="step reveal"><h3>Validate</h3><p>The engine checks that debits equal credits per currency and that no account is frozen. It also checks optimistic version preconditions, and that no account without overdraft would end up below its holds.</p></div><div class="step reveal"><h3>Apply + chain</h3><p>Balances, versions and per-account history are updated, then the journal is hashed onto the tenant&#x27;s chain. Nothing in this step can fail.</p></div><div class="step reveal"><h3>Reconcile</h3><p>Expected cash movements are matched to bank lines. Matching a settlement batch posts the bank and fee journal, and leftover lines become categorised breaks an operator can book.</p></div></div>
+    </section>
+    <section class="section wrap" id="arch">
+      <div class="sec-head reveal"><span class="kicker">Architecture</span><h2>System design</h2><p>Every box is a module in src/. Data flows left to right.</p></div>
+      <div class="card arch reveal"><svg viewBox="0 0 1160 230" role="img" aria-label="Architecture diagram"><path class="e" d="M272,73 C290,73 290,153 308,153"/><path class="f" d="M272,73 C290,73 290,153 308,153"/><path class="e" d="M272,153 C290,153 290,73 308,73"/><path class="f" d="M272,153 C290,153 290,73 308,73"/><path class="e" d="M548,124 C578,124 578,102 548,102"/><path class="f" d="M548,124 C578,124 578,102 548,102"/><path class="e" d="M562,73 C580,73 580,73 598,73"/><path class="f" d="M562,73 C580,73 580,73 598,73"/><path class="e" d="M562,73 C580,73 580,153 598,153"/><path class="f" d="M562,73 C580,73 580,153 598,153"/><path class="e" d="M852,73 C870,73 870,73 888,73"/><path class="f" d="M852,73 C870,73 870,73 888,73"/><path class="e" d="M852,153 C870,153 870,153 888,153"/><path class="f" d="M852,153 C870,153 870,153 888,153"/><path class="e" d="M888,73 C725,73 725,73 562,73"/><path class="f" d="M888,73 C725,73 725,73 562,73"/><text class="el" x="725" y="67" text-anchor="middle">settle</text><text class="lane" x="145" y="24" text-anchor="middle">CLIENTS</text><g class="node k0"><rect x="18" y="44" width="254" height="58" rx="12"/><text x="145" y="69" text-anchor="middle">HTTP API</text><text class="s" x="145" y="83" text-anchor="middle">Idempotency-Key</text></g><g class="node k0"><rect x="18" y="124" width="254" height="58" rx="12"/><text x="145" y="149" text-anchor="middle">Apps / CLI</text><text class="s" x="145" y="163" text-anchor="middle">post · hold · reverse</text></g><text class="lane" x="435" y="24" text-anchor="middle">LEDGER CORE</text><g class="node kk2"><rect x="308" y="44" width="254" height="58" rx="12"/><text x="435" y="69" text-anchor="middle">Validate</text><text class="s" x="435" y="83" text-anchor="middle">balance · funds · version</text></g><g class="node kk2"><rect x="308" y="124" width="254" height="58" rx="12"/><text x="435" y="149" text-anchor="middle">Idempotency</text><text class="s" x="435" y="163" text-anchor="middle">fingerprint · TTL</text></g><text class="lane" x="725" y="24" text-anchor="middle">STATE</text><g class="node kk3"><rect x="598" y="44" width="254" height="58" rx="12"/><text x="725" y="69" text-anchor="middle">Accounts</text><text class="s" x="725" y="83" text-anchor="middle">balance · holds · history</text></g><g class="node kk3"><rect x="598" y="124" width="254" height="58" rx="12"/><text x="725" y="149" text-anchor="middle">Hash chain</text><text class="s" x="725" y="163" text-anchor="middle">SHA-256 · Merkle anchor</text></g><text class="lane" x="1015" y="24" text-anchor="middle">ASSURANCE</text><g class="node k0"><rect x="888" y="44" width="254" height="58" rx="12"/><text x="1015" y="69" text-anchor="middle">Reconciliation</text><text class="s" x="1015" y="83" text-anchor="middle">ref · fee · batch</text></g><g class="node k0"><rect x="888" y="124" width="254" height="58" rx="12"/><text x="1015" y="149" text-anchor="middle">Verify</text><text class="s" x="1015" y="163" text-anchor="middle">re-hash · re-sum</text></g></svg></div>
+    </section>
+    <section class="section wrap" id="use">
+      <div class="sec-head reveal"><span class="kicker">Use it</span><h2>Ship it in your own stack</h2><p>Zero dependencies. Works in Node.js 18+ and modern browsers.</p></div>
+      <div class="tabs" data-tabs="use"><button class="on">JavaScript API</button><button>CLI</button><button>Install</button></div>
+      <div class="tabp on" data-tabp="use"><div class="codebox"><div class="bar2"><i></i><i></i><i></i><span>example.js</span><button class="btn sm ghost copy" data-copy>Copy</button></div><pre><code><span class="tk-k">import</span> { Ledger, reconcile } <span class="tk-k">from</span> <span class="tk-s">&quot;prism-ledger&quot;</span>;
+
+<span class="tk-k">const</span> L = <span class="tk-k">new</span> <span class="tk-f">Ledger</span>();
+L.<span class="tk-f">createTenant</span>(<span class="tk-s">&quot;acme&quot;</span>, { currency: <span class="tk-s">&quot;INR&quot;</span> });
+L.<span class="tk-f">openAccount</span>(<span class="tk-s">&quot;acme&quot;</span>, { code: <span class="tk-s">&quot;bank:hdfc&quot;</span>, type: <span class="tk-s">&quot;asset&quot;</span> });
+L.<span class="tk-f">openAccount</span>(<span class="tk-s">&quot;acme&quot;</span>, { code: <span class="tk-s">&quot;wallet:asha&quot;</span>, type: <span class="tk-s">&quot;liability&quot;</span> });
+L.<span class="tk-f">openAccount</span>(<span class="tk-s">&quot;acme&quot;</span>, { code: <span class="tk-s">&quot;merchant:chai&quot;</span>, type: <span class="tk-s">&quot;liability&quot;</span> });
+L.<span class="tk-f">openAccount</span>(<span class="tk-s">&quot;acme&quot;</span>, { code: <span class="tk-s">&quot;revenue:fees&quot;</span>, type: <span class="tk-s">&quot;revenue&quot;</span> });
+
+L.<span class="tk-f">post</span>(<span class="tk-s">&quot;acme&quot;</span>, { key: <span class="tk-s">&quot;tp-1&quot;</span>, entries: [{ account: <span class="tk-s">&quot;bank:hdfc&quot;</span>, dr: <span class="tk-s">&quot;2000&quot;</span> }, { account: <span class="tk-s">&quot;wallet:asha&quot;</span>, cr: <span class="tk-s">&quot;2000&quot;</span> }] });
+
+<span class="tk-c">// three legs, strings are exact decimals, integers are minor units (paise)</span>
+<span class="tk-k">const</span> { journal, replay } = L.<span class="tk-f">post</span>(<span class="tk-s">&quot;acme&quot;</span>, {
+  key: <span class="tk-s">&quot;pay-1&quot;</span>, memo: <span class="tk-s">&quot;QR payment&quot;</span>,
+  entries: [{ account: <span class="tk-s">&quot;wallet:asha&quot;</span>, dr: <span class="tk-s">&quot;120&quot;</span> }, { account: <span class="tk-s">&quot;merchant:chai&quot;</span>, cr: <span class="tk-s">&quot;117.60&quot;</span> }, { account: <span class="tk-s">&quot;revenue:fees&quot;</span>, cr: <span class="tk-s">&quot;2.40&quot;</span> }],
+});
+L.<span class="tk-f">post</span>(<span class="tk-s">&quot;acme&quot;</span>, { key: <span class="tk-s">&quot;pay-1&quot;</span>, <span class="tk-c">/* same body */</span> ... }).replay;     <span class="tk-c">// true: retries never double-post</span>
+
+<span class="tk-k">const</span> { hold } = L.<span class="tk-f">hold</span>(<span class="tk-s">&quot;acme&quot;</span>, { account: <span class="tk-s">&quot;wallet:asha&quot;</span>, to: <span class="tk-s">&quot;bank:hdfc&quot;</span>, amount: <span class="tk-s">&quot;600&quot;</span> });
+L.<span class="tk-f">commit</span>(<span class="tk-s">&quot;acme&quot;</span>, hold.id, { amount: <span class="tk-s">&quot;500&quot;</span> });                        <span class="tk-c">// capture part, release the rest</span>
+L.<span class="tk-f">reverse</span>(<span class="tk-s">&quot;acme&quot;</span>, journal.id);                                       <span class="tk-c">// refund</span>
+L.<span class="tk-f">balance</span>(<span class="tk-s">&quot;acme&quot;</span>, <span class="tk-s">&quot;wallet:asha&quot;</span>, { asOf: Date.<span class="tk-f">parse</span>(<span class="tk-s">&quot;2026-10-01&quot;</span>) });
+L.<span class="tk-f">trialBalance</span>(<span class="tk-s">&quot;acme&quot;</span>).balanced;                                     <span class="tk-c">// true</span>
+L.<span class="tk-f">verify</span>(<span class="tk-s">&quot;acme&quot;</span>);                                                    <span class="tk-c">// { ok, checked, head } or where it broke</span>
+L.<span class="tk-f">anchor</span>().root;                                                     <span class="tk-c">// Merkle root over every tenant chain</span>
+
+<span class="tk-f">reconcile</span>(expectedLines, bankLines, { settlementBps: <span class="tk-n">150</span> });         <span class="tk-c">// matches + categorised breaks</span></code></pre></div></div>
+      <div class="tabp" data-tabp="use"><div class="codebox"><div class="bar2"><i></i><i></i><i></i><span>terminal</span><button class="btn sm ghost copy" data-copy>Copy</button></div><pre><code><span class="tk-pr">$ </span>npx github:krishyaa06/prism-ledger demo
+<span class="tk-pr">$ </span>npx github:krishyaa06/prism-ledger simulate <span class="tk-p">--minutes</span> 5
+<span class="tk-pr">$ </span>npx github:krishyaa06/prism-ledger recon examples/expected.csv examples/bank.csv
+<span class="tk-pr">$ </span>npx github:krishyaa06/prism-ledger export <span class="tk-p">--out</span> ledger.json &amp;&amp; npx github:krishyaa06/prism-ledger verify ledger.json
+<span class="tk-pr">$ </span>npx github:krishyaa06/prism-ledger bench
+<span class="tk-pr">$ </span>npx github:krishyaa06/prism-ledger serve <span class="tk-p">--port</span> 8788</code></pre></div></div>
+      <div class="tabp" data-tabp="use"><div class="codebox"><div class="bar2"><i></i><i></i><i></i><span>terminal</span><button class="btn sm ghost copy" data-copy>Copy</button></div><pre><code><span class="tk-c"># use the CLI without installing</span>
+<span class="tk-pr">$ </span>npx github:krishyaa06/prism-ledger <span class="tk-p">--help</span>
+
+<span class="tk-c"># or add the engine to your project</span>
+<span class="tk-pr">$ </span>npm install github:krishyaa06/prism-ledger
+
+<span class="tk-c"># run the simulator locally</span>
+<span class="tk-pr">$ </span>git clone https://github.com/krishyaa06/prism-ledger.git &amp;&amp; cd prism-ledger
+<span class="tk-pr">$ </span>npx serve .   # then open http://localhost:3000</code></pre></div></div>
+    </section>
+  </main>
+  <footer class="foot"><div class="wrap">
+    <span>◆ Prism Ledger · Prism Systems 10/49 · Built by <a href="https://github.com/krishyaa06">Soumya Bhandare</a> &amp; <a href="https://dc.gg/prismprotocol" target="_blank" rel="noreferrer">Prism Protocol</a></span>
+    <span><a href="https://github.com/krishyaa06/prism-ledger" target="_blank" rel="noreferrer">Source</a> · <a href="https://github.com/krishyaa06/prism-ledger/blob/main/docs/ARCHITECTURE.md">Architecture</a> · <a href="https://github.com/krishyaa06/prism-ledger/blob/main/docs/USAGE.md">Docs</a> · MIT License</span>
+  </div></footer>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

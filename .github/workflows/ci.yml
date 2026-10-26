@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm test
+      - name: Smoke test
+        run: |
+          node bin/ledger.js demo && node bin/ledger.js recon examples/expected.csv examples/bank.csv && node bin/ledger.js export --out /tmp/l.json && node bin/ledger.js verify /tmp/l.json && node bin/ledger.js simulate --minutes 3 && node bin/ledger.js bench --n 20000
